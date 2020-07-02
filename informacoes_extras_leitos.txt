@@ -1,0 +1,14 @@
+58 - 140
+100 - x
+
+58x - 140*100
+
+x = (disponiveis*100)/(100-ocupados)
+
+21/maio
+uti: 2 + 5 + 4 + 11 + 4 + 2 + 2
+enfermaria: 25 + 14 + 29 + 16 + 12 + 3 + 9
+
+22/maio
++ 20 uti
++ 22 enfermaria

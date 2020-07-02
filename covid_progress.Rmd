@@ -1,0 +1,72 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(hrbrthemes)
+```
+# Importa os dados
+
+## numero de leitos disponiveis por dia
+
+### Campina passou a ter 237 leitos de enfermaria e 104 de uti disponíveis a partir do dia 22 de maio:
+Noticia do total de leitos: http://blogs.jornaldaparaiba.com.br/plenopoder/2020/05/26/campina-grande-supera-caruaru-e-feira-de-santana-em-numero-de-leitos-de-uti-e-enfermaria-para-covid-19/ 
+
+### Dia 22 de maio foram abertos 22 leitos de enfermaria e 20 de uti no hospital de campanha
+Antes do dia 22, eram 215 leito de enfermaria e 84 de uti: https://campinagrande.pb.gov.br/covid-19-em-coletiva-virtual-secretario-da-saude-de-campina-grande-diz-que-hospital-de-campanha-devera-funcionar-a-partir-desta-sexta/
+```{r}
+covid_cg = read_csv("covid-cg.csv")
+
+MAIO_22 = "2020-05-22"
+covid_cg = covid_cg %>%
+  mutate(data = ydm(paste(ano,dia,mes,sep="-")),
+         total_enfermaria = if_else(data < MAIO_22, 215, 237),
+         total_uti = if_else(data < MAIO_22, 84, 104))
+```
+
+
+```{r}
+
+```
+
+# Número de casos totais
+```{r}
+covid_cg %>% ggplot(aes(x=data, y=confirmados)) +
+  geom_line(color="#69b3a2", size=1) +
+  theme_bw()
+
+ggsave("confirmados.png", width = 6, height = 4)
+```
+
+# Ocupação de UTI e Enfermaria ao longo dos dias
+```{r}
+enf = covid_cg %>%
+  filter(enfermaria!="-") %>%
+  mutate(leito = "enfermaria", taxa_ocupacao = as.numeric(enfermaria)) %>%
+  select(data, leito, taxa_ocupacao)
+
+uti = covid_cg %>%
+  filter(uti!="-") %>%
+  mutate(leito = "uti", taxa_ocupacao = as.numeric(uti)) %>%
+  select(data, leito, taxa_ocupacao)
+
+data_uti_enf = enf %>%
+  bind_rows(uti) %>% 
+  arrange(data)
+
+data_uti_enf %>%
+  ggplot(aes(x=data, y=taxa_ocupacao, col = leito)) +
+  geom_line(size=1) +
+  geom_hline(yintercept = 100, linetype="dashed") + 
+  labs(y = "Taxa de Ocupação (%)") +
+  theme_bw() +
+  theme(legend.position="bottom")
+
+ggsave("leitos.png", width = 6, height = 4)
+```
+
+
